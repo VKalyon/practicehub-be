@@ -1,6 +1,6 @@
 # REST API Starter
 
-This is a RESTful API Starter with a single Hello World API endpoint.
+This is a RESTful API Starter with a single Hello World API endpoint..
 
 ## Developing locally
 
