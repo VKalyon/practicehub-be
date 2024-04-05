@@ -6,6 +6,6 @@ import (
 
 func TestFunction(t *testing.T) {
 	if true {
-		t.Errorf("test failed")
+		t.Errorf("trying to test my ci pipeline")
 	}
 }
