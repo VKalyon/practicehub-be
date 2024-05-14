@@ -1,11 +1,7 @@
 package video
 
-import (
-	"testing"
-)
-
-func TestFunction(t *testing.T) {
-	if true {
-		t.Errorf("trying to test my ci pipeline")
-	}
-}
+// func TestFunction(t *testing.T) {
+// 	if true {
+// 		t.Errorf("trying to test my ci pipeline")
+// 	}
+// }
