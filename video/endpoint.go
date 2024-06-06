@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/hex"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 
+	"encore.dev/rlog"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -40,25 +40,14 @@ func (s *VideoService) GetVideo(ctx context.Context, id int) (*Metadata, error) 
 func (s *VideoService) GetAllVideos(ctx context.Context) (*MetadataCollection, error) {
 	m, err := selectAllMetadata(ctx)
 
-	for _, data := range m.Metadatas {
-		log.Println(hex.EncodeToString(data.MongoId))
-	}
 	return &m, err
 }
-
-//encore:api public method=POST path=/video
-// func (s *VideoService) PostVideoMetadata(ctx context.Context, mdata *MetadataParams) error {
-// 	log.Println(mdata.MongoId)
-// 	return insertMetadata(ctx, mdata)
-// }
 
 //encore:api public method=DELETE path=/video
 func (s *VideoService) DeleteAllMetadata(ctx context.Context) error {
 	return deleteAllMetadata(ctx)
 }
 
-// NOTE: this endpoint does not work
-//
 //encore:api public raw method=POST path=/video
 func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 	const maxUploadSize = 500 << 20 // 500MB
@@ -69,8 +58,10 @@ func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		if err.Error() == "http: request body too large" {
 			http.Error(w, "File too large. Maximum size is 500 MB", http.StatusRequestEntityTooLarge)
+			rlog.Error(err.Error())
 		} else {
 			http.Error(w, "Error parsing form", http.StatusBadRequest)
+			rlog.Error(err.Error())
 		}
 
 		return
@@ -78,8 +69,8 @@ func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 
 	file, header, err := req.FormFile("file")
 	if err != nil {
-		log.Println(err)
 		http.Error(w, "Error retrieving the file", http.StatusBadRequest)
+		rlog.Error(err.Error())
 		return
 	}
 	defer file.Close()
@@ -89,6 +80,7 @@ func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 	_, err = file.Read(buffer)
 	if err != nil {
 		http.Error(w, "Error reading the file", http.StatusInternalServerError)
+		rlog.Error(err.Error())
 		return
 	}
 
@@ -101,11 +93,13 @@ func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 	contentType := http.DetectContentType(buffer)
 	if !isValidVideoContentType(contentType) {
 		http.Error(w, "Invalid file type. Only video files are allowed", http.StatusUnsupportedMediaType)
+		rlog.Error("Invalid content type. Only video files are allowed")
 		return
 	}
 
 	if !isValidVideoExtension(header.Filename) {
 		http.Error(w, "Invalid file extension. Only video files are allowed", http.StatusUnsupportedMediaType)
+		rlog.Error("Invalid file extension. Only video files are allowed")
 		return
 	}
 
@@ -113,6 +107,7 @@ func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 
 	tempFile, err := os.CreateTemp("", "upload-*.mp4")
 	if err != nil {
+		rlog.Error("Error occurred while creating temporary file")
 		internalServerError(w)
 		return
 	}
@@ -120,12 +115,14 @@ func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 
 	_, err = io.Copy(tempFile, file)
 	if err != nil {
+		rlog.Error("Error occurred while copying file")
 		internalServerError(w)
 		return
 	}
 
 	_, err = tempFile.Seek(0, io.SeekStart)
 	if err != nil {
+		rlog.Error("Error occurred while seeking start of file")
 		internalServerError(w)
 		return
 	}
@@ -133,6 +130,7 @@ func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 	var id primitive.ObjectID
 
 	if id, err = s.uploadVideo(tempFile); err != nil {
+		rlog.Error(err.Error())
 		internalServerError(w)
 		return
 	}
@@ -140,7 +138,7 @@ func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 	mdata := MetadataParams{MongoId: id.Hex(), Title: title}
 
 	if err = insertMetadata(req.Context(), &mdata); err != nil {
-		log.Println(err)
+		rlog.Error(err.Error())
 	}
 }
 
