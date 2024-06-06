@@ -3,9 +3,9 @@ package video
 import (
 	"bytes"
 	"context"
-	"log"
 	"os"
 
+	"encore.dev/rlog"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
@@ -38,7 +38,7 @@ func (s *VideoService) uploadVideo(video *os.File) (primitive.ObjectID, error) {
 		return objectID, err
 	}
 
-	log.Printf("New file uploaded with ID %s", objectID)
+	rlog.Info("New file uploaded with ID %s", objectID)
 
 	return objectID, err
 }
@@ -47,20 +47,21 @@ func (s *VideoService) getVideoById(mongoidHex string) {
 	db := s.client.Database("practiceHubVideo")
 	bucket, err := gridfs.NewBucket(db)
 	if err != nil {
-		log.Println(err)
+		rlog.Error(err.Error())
 		return
 	}
 
 	id, err := primitive.ObjectIDFromHex(mongoidHex)
 	if err != nil {
-		log.Println(err)
+		rlog.Error(err.Error())
+
 		return
 	}
 
 	fileBuffer := bytes.NewBuffer(nil)
 	if _, err := bucket.DownloadToStream(id, fileBuffer); err != nil {
-		log.Println(err)
+		rlog.Error(err.Error())
 	}
 
-	log.Println(fileBuffer.Len())
+	rlog.Info(string(fileBuffer.Len()))
 }
