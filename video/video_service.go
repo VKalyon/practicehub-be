@@ -1,6 +1,12 @@
 package video
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
+)
 
 //encore:service
 type VideoService struct {
@@ -9,8 +15,17 @@ type VideoService struct {
 }
 
 func initVideoService() (*VideoService, error) {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	mongodbURI := os.Getenv("MONGODB_URI")
+	if mongodbURI == "" {
+		log.Fatal("MONGODB_URI environment variable is not set")
+	}
+
 	service := VideoService{
-		mongoUri: "mongodb://localhost:27017",
+		mongoUri: mongodbURI,
 	}
 
 	service.connect()
