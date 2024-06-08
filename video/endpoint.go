@@ -51,10 +51,13 @@ func (s *VideoService) DeleteAllMetadata(ctx context.Context) error {
 //encore:api public raw method=POST path=/video
 func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 	const maxUploadSize = 500 << 20 // 500MB
+	const maxMemory = 64 << 20      // 64MB
 
+	// sets the max permitted size of the body of the request to 500 MB
 	req.Body = http.MaxBytesReader(w, req.Body, maxUploadSize)
 
-	err := req.ParseMultipartForm(maxUploadSize)
+	// sets the max size allocated to memory, after which it starts writing to disk
+	err := req.ParseMultipartForm(maxMemory)
 	if err != nil {
 		if err.Error() == "http: request body too large" {
 			http.Error(w, "File too large. Maximum size is 500 MB", http.StatusRequestEntityTooLarge)
@@ -66,6 +69,7 @@ func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
+	defer req.MultipartForm.RemoveAll()
 
 	file, header, err := req.FormFile("file")
 	if err != nil {
@@ -111,7 +115,10 @@ func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 		internalServerError(w)
 		return
 	}
-	defer tempFile.Close()
+	defer func() {
+		tempFile.Close()
+		os.Remove(tempFile.Name())
+	}()
 
 	_, err = io.Copy(tempFile, file)
 	if err != nil {

@@ -14,6 +14,8 @@ var secrets struct {
 }
 
 func initVideoService() (*VideoService, error) {
+	go measureMemory()
+
 	service := VideoService{}
 
 	service.connect()
