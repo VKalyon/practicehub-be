@@ -3,6 +3,7 @@ package video
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 
 	"encore.dev/rlog"
@@ -38,7 +39,8 @@ func (s *VideoService) uploadVideo(video *os.File) (primitive.ObjectID, error) {
 		return objectID, err
 	}
 
-	rlog.Info("New file uploaded with ID %s", objectID)
+	info := fmt.Sprintf("New file uploaded with ID %s", objectID.Hex())
+	rlog.Info(info)
 
 	return objectID, err
 }
@@ -63,5 +65,5 @@ func (s *VideoService) getVideoById(mongoidHex string) {
 		rlog.Error(err.Error())
 	}
 
-	rlog.Info(string(fileBuffer.Len()))
+	rlog.Info(fmt.Sprint(fileBuffer.Len()))
 }
