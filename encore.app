@@ -3,10 +3,10 @@
 	"global_cors": {
 		"debug": true,
 		"allow_origins_without_credentials": [
-			"https://jade-lokum-90fd15.netlify.app/"
+			"https://jade-lokum-90fd15.netlify.app"
 		],
 		"allow_origins_with_credentials": [
-			"https://jade-lokum-90fd15.netlify.app/"
+			"https://jade-lokum-90fd15.netlify.app"
 		],
 		"allow_headers": ["*"],
 		"expose_headers": ["*"]
