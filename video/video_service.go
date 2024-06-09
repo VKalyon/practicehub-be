@@ -1,6 +1,8 @@
 package video
 
 import (
+	//_ "net/http/pprof"
+
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -14,6 +16,9 @@ var secrets struct {
 }
 
 func initVideoService() (*VideoService, error) {
+	// go func() {
+	// 	http.ListenAndServe("localhost:6060", nil)
+	// }()
 	go measureMemory()
 
 	service := VideoService{}
