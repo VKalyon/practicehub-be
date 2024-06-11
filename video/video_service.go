@@ -19,7 +19,7 @@ func initVideoService() (*VideoService, error) {
 	// go func() {
 	// 	http.ListenAndServe("localhost:6060", nil)
 	// }()
-	go measureMemory()
+	//go measureMemory()
 
 	service := VideoService{}
 

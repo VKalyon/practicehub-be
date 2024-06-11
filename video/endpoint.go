@@ -39,6 +39,7 @@ func (s *VideoService) GetVideo(ctx context.Context, id int) (*Metadata, error) 
 //encore:api public method=GET path=/video
 func (s *VideoService) GetAllVideos(ctx context.Context) (*MetadataCollection, error) {
 	m, err := selectAllMetadata(ctx)
+	measureMemory()
 
 	return &m, err
 }
