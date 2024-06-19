@@ -10,7 +10,7 @@ import (
 )
 
 var MemoryUsage = metrics.NewGauge[float64]("memory_usage_in_bytes", metrics.GaugeConfig{})
-var RequestResponseTime = metrics.NewGauge[float64]("request_response_time_in_ms", metrics.GaugeConfig{})
+var RequestResponseTime = metrics.NewCounter[float64]("total_request_response_time_in_ms", metrics.CounterConfig{})
 
 func measureMemory() {
 	ticker := time.NewTicker(10 * time.Second)
@@ -33,5 +33,5 @@ func startResponseTime() time.Time {
 // call this function with a defer statement and pass startResponseTime to it
 func measureResponseTime(startTime time.Time) {
 	deltaTime := time.Since(startTime).Milliseconds()
-	RequestResponseTime.Set(float64(deltaTime))
+	RequestResponseTime.Add(float64(deltaTime))
 }
