@@ -9,8 +9,14 @@ import (
 	"encore.dev/rlog"
 )
 
-var MemoryUsage = metrics.NewGauge[float64]("memory_usage_in_bytes", metrics.GaugeConfig{})
-var RequestResponseTime = metrics.NewCounter[float64]("total_request_response_time_in_ms", metrics.CounterConfig{})
+type RequestLabel struct {
+	RequestType     string
+	RequestResource string
+}
+
+var MemoryUsage = metrics.NewGauge[float64]("server_memory_usage_bytes", metrics.GaugeConfig{})
+var RequestResponseTime = metrics.NewCounterGroup[RequestLabel, float64]("http_request_duration_ms_total", metrics.CounterConfig{})
+var Requests = metrics.NewCounterGroup[RequestLabel, uint64]("http_requests_total", metrics.CounterConfig{})
 
 func measureMemory() {
 	ticker := time.NewTicker(10 * time.Second)
@@ -31,7 +37,8 @@ func startResponseTime() time.Time {
 }
 
 // call this function with a defer statement and pass startResponseTime to it
-func measureResponseTime(startTime time.Time) {
+func measureResponseTime(requestLabel RequestLabel, startTime time.Time) {
 	deltaTime := time.Since(startTime).Milliseconds()
-	RequestResponseTime.Add(float64(deltaTime))
+	RequestResponseTime.With(requestLabel).Add(float64(deltaTime))
+	Requests.With(requestLabel).Add(1)
 }
