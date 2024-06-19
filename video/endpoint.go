@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"encore.app/middleware"
 	"encore.dev/rlog"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -148,6 +149,8 @@ func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
 	if err = insertMetadata(req.Context(), &mdata); err != nil {
 		rlog.Error(err.Error())
 	}
+
+	videoUploadedTopicRef.Publish(req.Context(), &middleware.VideoUploadedEvent{Message: "This is an event"})
 }
 
 func internalServerError(w http.ResponseWriter) {
