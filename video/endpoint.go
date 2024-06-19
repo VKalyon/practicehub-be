@@ -30,6 +30,8 @@ type MetadataCollection struct {
 
 //encore:api public path=/video/:id
 func (s *VideoService) GetVideo(ctx context.Context, id int) (*Metadata, error) {
+	defer measureResponseTime()
+
 	response, err := selectMetadata(ctx, id)
 	mongoidHex := hex.EncodeToString(response.MongoId)
 	s.getVideoById(mongoidHex)
@@ -39,6 +41,8 @@ func (s *VideoService) GetVideo(ctx context.Context, id int) (*Metadata, error) 
 
 //encore:api public method=GET path=/video
 func (s *VideoService) GetAllVideos(ctx context.Context) (*MetadataCollection, error) {
+	defer measureResponseTime()
+
 	m, err := selectAllMetadata(ctx)
 	measureMemory()
 
@@ -47,11 +51,15 @@ func (s *VideoService) GetAllVideos(ctx context.Context) (*MetadataCollection, e
 
 //encore:api public method=DELETE path=/video
 func (s *VideoService) DeleteAllMetadata(ctx context.Context) error {
+	defer measureResponseTime()
+
 	return deleteAllMetadata(ctx)
 }
 
 //encore:api public raw method=POST path=/video
 func (s *VideoService) PostVideo(w http.ResponseWriter, req *http.Request) {
+	defer measureResponseTime()
+
 	const maxUploadSize = 500 << 20 // 500MB
 	const maxMemory = 64 << 20      // 64MB
 
