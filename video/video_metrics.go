@@ -26,11 +26,12 @@ func measureMemory() {
 	}
 }
 
-// call this function with a defer statement
-func measureResponseTime() func() {
-	start := time.Now()
-	return func() {
-		deltaTime := time.Since(start).Milliseconds()
-		RequestResponseTime.Set(float64(deltaTime))
-	}
+func startResponseTime() time.Time {
+	return time.Now()
+}
+
+// call this function with a defer statement and pass startResponseTime to it
+func measureResponseTime(startTime time.Time) {
+	deltaTime := time.Since(startTime).Milliseconds()
+	RequestResponseTime.Set(float64(deltaTime))
 }
