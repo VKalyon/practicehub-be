@@ -7,7 +7,7 @@ on:
 name: Code Quality
 jobs:
     sonarcloud:
-        runs-on: ubunta-latest
+        runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v4
           with:
