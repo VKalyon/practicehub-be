@@ -16,6 +16,7 @@ import (
 func (s *VideoService) connect() {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(secrets.MONGODB_URI).SetServerAPIOptions(serverAPI)
+	//opts := options.Client().ApplyURI(mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@cluster0.example.mongodb.net/).SetServerAPIOptions(serverAPI)
 
 	var err error
 	s.client, err = mongo.Connect(context.TODO(), opts)
