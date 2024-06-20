@@ -3,7 +3,7 @@ on:
         branches:
             - master
     pull_request:
-        types: [opened]
+        types: [opened, reopened]
 name: Code Quality
 jobs:
     sonarcloud:
